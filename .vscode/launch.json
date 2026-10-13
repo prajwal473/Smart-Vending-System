@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "MedicineVendingSystem_c8fb0a1b"
+        },
+        {
+            "type": "java",
+            "name": "Run Smart Vending System",
+            "request": "launch",
+            "mainClass": "ui.MedicineFrame",
+            "classPaths": [
+                "$Auto",
+                "${workspaceFolder}/lib/mysql-connector-j-9.7.0.jar"
+            ]
+        }
+    ]
+}
