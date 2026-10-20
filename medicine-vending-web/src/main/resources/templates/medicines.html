@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Browse Medicines | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+	<a class="skip-link" href="#medicines">Skip to medicines</a>
+
+	<header class="site-header">
+		<div class="header-inner">
+			<div class="brand">
+				<div class="brand-mark" aria-hidden="true">+</div>
+				<div>
+					<p class="eyebrow">Customer kiosk</p>
+					<h1>SMART VENDING SYSTEM FOR OTC MEDICINES AND ESSENTIALS</h1>
+					<p class="lede">
+						Browse current machine stock and buy over-the-counter items using a simulated payment.
+						Expired, out-of-stock and prescription-only items are shown so you can see their status, but cannot be bought here.
+					</p>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="page">
+		<section class="toolbar" aria-label="Search and filter medicines">
+			<form class="filter-form" method="get" th:action="@{/}">
+				<div class="field">
+					<label for="q">Search by medicine name</label>
+					<input id="q" name="q" type="search"
+						placeholder="For example: paracetamol"
+						th:value="${q}"
+						autocomplete="off">
+				</div>
+				<div class="field">
+					<label for="category">Category</label>
+					<select id="category" name="category" onchange="this.form.submit()">
+						<option value="">All categories</option>
+						<option th:each="cat : ${categories}"
+							th:value="${cat}"
+							th:text="${cat}"
+							th:selected="${cat} == ${selectedCategory}">Category</option>
+					</select>
+				</div>
+				<div class="actions">
+					<button class="btn btn-primary" type="submit">Search</button>
+					<a class="btn btn-secondary" th:href="@{/}">Clear</a>
+				</div>
+			</form>
+		</section>
+
+		<div class="results-meta">
+			<p th:text="|Showing ${resultCount} of ${totalCount} medicines.|">Showing 0 of 0 medicines.</p>
+			<p>Prices are in Indian rupees (₹).</p>
+		</div>
+
+		<section id="medicines" aria-live="polite">
+			<div th:if="${#lists.isEmpty(medicines)}" class="empty-state">
+				<p>No medicines match your search. Try a different name or choose All categories.</p>
+			</div>
+
+			<div th:unless="${#lists.isEmpty(medicines)}" class="card-grid">
+				<article class="medicine-card"
+					th:each="medicine : ${medicines}"
+					th:classappend="${!medicine.inStockAndUnexpired} ? ' is-unavailable'"
+					th:attr="data-id=${medicine.medicineId},
+						data-name=${medicine.medicineName},
+						data-category=${medicine.category},
+						data-price=${medicine.price},
+						data-stock=${medicine.stock},
+						data-expiry=${#temporals.format(medicine.expiryDate, 'dd MMM yyyy')},
+						data-rx=${medicine.prescriptionRequired},
+						data-expired=${medicine.expired},
+						data-out-of-stock=${medicine.outOfStock}"
+					tabindex="0"
+					th:aria-label="|Details for ${medicine.medicineName}|">
+
+					<span class="category-chip" th:text="${medicine.category}">Category</span>
+					<h2 th:text="${medicine.medicineName}">Medicine name</h2>
+					<p class="price"
+						th:text="${'₹' + #numbers.formatDecimal(medicine.price, 1, 'COMMA', 2, 'POINT')}">₹0.00</p>
+
+					<p class="details">
+						<span th:text="${'Stock: ' + medicine.stock}">Stock: 0</span><br>
+						<span th:text="${'Expiry: ' + #temporals.format(medicine.expiryDate, 'dd MMM yyyy')}">Expiry: —</span>
+					</p>
+
+					<div class="badges">
+						<span th:if="${medicine.inStockAndUnexpired}" class="badge badge-available">Available</span>
+						<span th:if="${medicine.outOfStock}" class="badge badge-stock">Out of Stock</span>
+						<span th:if="${medicine.expired}" class="badge badge-expired">Expired</span>
+						<span th:if="${medicine.prescriptionRequired}" class="badge badge-rx">Prescription Required</span>
+					</div>
+
+					<div class="card-action">
+						<button class="btn btn-primary js-open-details" type="button">
+							Details
+						</button>
+						<button class="btn btn-secondary js-open-details" type="button"
+							th:if="${medicine.inStockAndUnexpired and !medicine.prescriptionRequired}">
+							Choose quantity &amp; buy
+						</button>
+						<button class="btn btn-disabled" type="button" disabled
+							th:if="${medicine.inStockAndUnexpired and medicine.prescriptionRequired}">
+							Prescription required
+						</button>
+						<button class="btn btn-disabled" type="button" disabled
+							th:if="${!medicine.inStockAndUnexpired}">
+							Not available for purchase
+						</button>
+						<p class="status-note"
+							th:if="${medicine.prescriptionRequired}">
+							This item needs a valid prescription and cannot be sold from this kiosk.
+						</p>
+						<p class="status-note"
+							th:if="${medicine.expired}">
+							This item has expired and cannot be purchased.
+						</p>
+						<p class="status-note"
+							th:if="${medicine.outOfStock and !medicine.expired}">
+							This item is out of stock in the machine.
+						</p>
+					</div>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<footer class="site-footer">
+		<p>Stock and expiry dates come from the existing vending database. Payments are simulated; no real money is taken and no dispensing hardware is activated.</p>
+	</footer>
+
+	<div id="medicine-modal" class="modal" hidden th:attr="data-purchase-url=@{/purchase/confirm}">
+		<div class="modal-backdrop" data-close-modal tabindex="-1"></div>
+		<div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+			<button type="button" class="modal-close" data-close-modal aria-label="Close details">Close</button>
+
+			<p class="category-chip" id="modal-category">Category</p>
+			<h2 id="modal-title">Medicine name</h2>
+			<p class="price" id="modal-price">₹0.00</p>
+
+			<div id="modal-badges" class="badges"></div>
+
+			<div id="modal-rx" class="rx-banner" hidden>
+				<strong>Prescription required.</strong>
+				This item cannot be sold without a valid prescription. This kiosk cannot verify or bypass that requirement.
+			</div>
+
+			<dl class="modal-facts">
+				<div>
+					<dt>Available stock</dt>
+					<dd id="modal-stock">0</dd>
+				</div>
+				<div>
+					<dt>Expiry date</dt>
+					<dd id="modal-expiry">—</dd>
+				</div>
+			</dl>
+
+			<section class="info-block">
+				<h3>Description</h3>
+				<p id="modal-description">
+					General information: a product description is not stored in the medicines database.
+					Details are unavailable here.
+				</p>
+			</section>
+
+			<section class="info-block">
+				<h3>General uses</h3>
+				<p id="modal-uses">
+					General information: approved uses are not stored in this vending system.
+					Details are unavailable here.
+				</p>
+			</section>
+
+			<section class="info-block">
+				<h3>Safety warnings</h3>
+				<p id="modal-safety">
+					No medicine-specific safety warnings are stored in this database.
+					Read the pack leaflet, check allergies, and ask a pharmacist or doctor before use.
+					This kiosk is not a substitute for professional medical advice.
+				</p>
+			</section>
+
+			<div class="quantity-row">
+				<label for="modal-quantity">Quantity</label>
+				<div class="quantity-controls">
+					<button type="button" id="qty-minus" aria-label="Decrease quantity">−</button>
+					<input id="modal-quantity" type="number" min="1" value="1" inputmode="numeric">
+					<button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
+				</div>
+			</div>
+
+			<p id="modal-message" class="modal-message" role="status" aria-live="polite"></p>
+
+			<div class="modal-actions">
+				<button type="button" class="btn btn-primary" id="buy-now">Buy Now</button>
+				<button type="button" class="btn btn-secondary" data-close-modal>Close</button>
+			</div>
+		</div>
+	</div>
+
+	<script th:src="@{/js/medicine-modal.js}"></script>
+</body>
+</html>

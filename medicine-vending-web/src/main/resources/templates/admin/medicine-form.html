@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title th:text="${formTitle + ' - Admin - Smart Vending System'}">Medicine - Admin</title>
+	<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside th:replace="~{admin/fragments :: sidebar('medicines')}"></aside>
+
+		<main class="content" id="main">
+			<header class="page-head">
+				<div>
+					<p class="eyebrow">Inventory</p>
+					<h1 th:text="${formTitle}">Add medicine</h1>
+				</div>
+				<a class="btn btn-secondary" th:href="@{/admin/medicines}">&larr; Back to medicines</a>
+			</header>
+
+			<p class="alert alert-error" role="alert" th:if="${flashError != null}" th:text="${flashError}">Error.</p>
+			<p class="alert alert-error" role="alert" th:if="${#fields.hasErrors('${form.*}')}">
+				Please fix the highlighted fields and try again.
+			</p>
+
+			<section class="panel">
+				<form method="post" th:action="@{${formAction}}" th:object="${form}" class="form-grid">
+					<div class="field">
+						<label for="medicineName">Medicine name</label>
+						<input id="medicineName" type="text" th:field="*{medicineName}" maxlength="100" required>
+						<p class="field-error" th:if="${#fields.hasErrors('medicineName')}" th:errors="*{medicineName}">Error</p>
+					</div>
+					<div class="field">
+						<label for="category">Category</label>
+						<input id="category" type="text" th:field="*{category}" maxlength="50" required>
+						<p class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">Error</p>
+					</div>
+					<div class="field">
+						<label for="price">Price (₹)</label>
+						<input id="price" type="number" th:field="*{price}" step="0.01" min="0.01" max="99999999.99" required>
+						<p class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Error</p>
+					</div>
+					<div class="field" th:unless="${editing}">
+						<label for="stock">Starting stock</label>
+						<input id="stock" type="number" th:field="*{stock}" step="1" min="0" max="1000000" required>
+						<p class="field-error" th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}">Error</p>
+					</div>
+					<div class="field" th:if="${editing}">
+						<label>Current stock</label>
+						<p class="static-value"><strong th:text="${medicine.stock}">0</strong>
+							<a th:href="@{/admin/medicines/{id}/stock(id=${medicine.medicineId})}">Change stock</a></p>
+						<p class="muted">Stock is changed separately so an edit can never overwrite a recent sale.</p>
+					</div>
+					<div class="field">
+						<label for="slotNumber">Slot number</label>
+						<input id="slotNumber" type="number" th:field="*{slotNumber}" step="1" min="1" max="9999" required>
+						<p class="field-error" th:if="${#fields.hasErrors('slotNumber')}" th:errors="*{slotNumber}">Error</p>
+					</div>
+					<div class="field">
+						<label for="expiryDate">Expiry date</label>
+						<input id="expiryDate" type="date" th:field="*{expiryDate}" required>
+						<p class="field-error" th:if="${#fields.hasErrors('expiryDate')}" th:errors="*{expiryDate}">Error</p>
+					</div>
+					<div class="field checkbox-field">
+						<label class="check"><input id="prescriptionRequired" type="checkbox" th:field="*{prescriptionRequired}">
+							Prescription required (cannot be sold from the kiosk)</label>
+					</div>
+					<div class="form-actions">
+						<button class="btn btn-primary" type="submit" th:text="${editing} ? 'Save changes' : 'Add medicine'">Save</button>
+						<a class="btn btn-secondary" th:href="@{/admin/medicines}">Cancel</a>
+					</div>
+				</form>
+			</section>
+		</main>
+	</div>
+</body>
+</html>

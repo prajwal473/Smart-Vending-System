@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Purchase Receipt | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/home.css}">
+	<link rel="stylesheet" th:href="@{/css/purchase.css}">
+</head>
+<body>
+	<header class="site-header no-print">
+		<div class="header-inner">
+			<div class="brand">
+				<div class="brand-mark" aria-hidden="true">+</div>
+				<div>
+					<p class="eyebrow">Step 2 of 2 · Done</p>
+					<h1>Payment successful</h1>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="page purchase-page">
+		<section class="purchase-card receipt" aria-labelledby="receipt-heading">
+			<h2 id="receipt-heading">Purchase Receipt</h2>
+			<p class="receipt-ref">
+				Transaction reference<br>
+				<strong th:text="${transaction.transactionReference}">TXN-00000001</strong>
+			</p>
+
+			<dl class="order-lines">
+				<div>
+					<dt>Date &amp; time</dt>
+					<dd th:text="${transaction.transactionDate != null} ? ${#temporals.format(transaction.transactionDate, 'dd MMM yyyy, HH:mm:ss')} : 'Recorded'">—</dd>
+				</div>
+				<div>
+					<dt>Medicine</dt>
+					<dd th:text="${transaction.medicineName}">Medicine</dd>
+				</div>
+				<div>
+					<dt>Quantity</dt>
+					<dd th:text="${transaction.quantity}">1</dd>
+				</div>
+				<div>
+					<dt>Price per item</dt>
+					<dd th:text="${'₹' + #numbers.formatDecimal(transaction.unitPrice, 1, 'COMMA', 2, 'POINT')}">₹0.00</dd>
+				</div>
+				<div class="order-total">
+					<dt>Total paid</dt>
+					<dd th:text="${'₹' + #numbers.formatDecimal(transaction.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹0.00</dd>
+				</div>
+				<div>
+					<dt>Payment</dt>
+					<dd>Simulated payment — SUCCESS</dd>
+				</div>
+				<div>
+					<dt>Dispensing</dt>
+					<dd>Not performed yet (hardware dispensing is a later stage)</dd>
+				</div>
+			</dl>
+
+			<p class="notice">
+				This is a simulated payment for a college project. No real money was taken.
+				Keep the transaction reference if you need to refer to this purchase.
+			</p>
+
+			<div class="pay-actions no-print">
+				<button class="btn btn-secondary" type="button" id="print-receipt">Print receipt</button>
+				<a class="btn btn-primary" th:href="@{/}">Back to medicines</a>
+			</div>
+		</section>
+	</main>
+
+	<script th:src="@{/js/purchase.js}"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Manage Medicines | Admin | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside th:replace="~{admin/fragments :: sidebar('medicines')}"></aside>
+
+		<main class="content" id="main">
+			<header class="page-head">
+				<div>
+					<p class="eyebrow">Inventory</p>
+					<h1>Manage Medicines</h1>
+				</div>
+				<div class="head-actions">
+					<a class="btn btn-secondary" th:href="@{/admin/dashboard}">&larr; Dashboard</a>
+					<a class="btn btn-primary" th:href="@{/admin/medicines/new}">Add medicine</a>
+				</div>
+			</header>
+
+			<p class="alert alert-success" role="status" th:if="${flashSuccess != null}" th:text="${flashSuccess}">Saved.</p>
+			<p class="alert alert-error" role="alert" th:if="${flashError != null}" th:text="${flashError}">Error.</p>
+
+			<section class="panel" aria-labelledby="inv-title">
+				<h2 id="inv-title">All medicines
+					<span class="pill" th:text="${#lists.size(medicines)}">0</span></h2>
+				<p class="empty" th:if="${#lists.isEmpty(medicines)}">No medicines yet. Use “Add medicine” to create the first one.</p>
+				<div class="table-wrap" th:unless="${#lists.isEmpty(medicines)}">
+					<table>
+						<thead>
+							<tr>
+								<th>ID</th><th>Medicine</th><th>Category</th><th class="num">Price</th>
+								<th class="num">Stock</th><th>Slot</th><th>Expiry</th><th>Prescription</th><th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="m : ${medicines}">
+								<td th:text="${m.medicineId}">1</td>
+								<td th:text="${m.medicineName}">Name</td>
+								<td th:text="${m.category}">Category</td>
+								<td class="num" th:text="${'₹' + #numbers.formatDecimal(m.price, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+								<td class="num">
+									<span class="pill" th:classappend="${m.stock <= 0} ? 'pill-bad'"
+										th:text="${m.stock}">0</span>
+								</td>
+								<td th:text="${m.slotNumber}">1</td>
+								<td>
+									<span th:text="${m.expiryDate == null} ? '—' : ${#temporals.format(m.expiryDate, 'dd MMM yyyy')}">01 Jan 2030</span>
+									<span class="pill pill-bad" th:if="${m.expired}">Expired</span>
+								</td>
+								<td><span class="pill" th:classappend="${m.prescriptionRequired} ? 'pill-warn'"
+									th:text="${m.prescriptionRequired} ? 'Required' : 'No'">No</span></td>
+								<td class="actions">
+									<a class="btn btn-sm btn-secondary" th:href="@{/admin/medicines/{id}/edit(id=${m.medicineId})}">Edit</a>
+									<a class="btn btn-sm btn-secondary" th:href="@{/admin/medicines/{id}/stock(id=${m.medicineId})}">Stock</a>
+									<form class="inline-form confirm-form" method="post"
+										th:action="@{/admin/medicines/{id}/delete(id=${m.medicineId})}"
+										th:attr="data-confirm=|Delete ${m.medicineName}? This cannot be undone.|">
+										<button class="btn btn-sm btn-danger" type="submit">Delete</button>
+									</form>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<p class="muted more">Medicines that already have sales records cannot be deleted; set their stock to 0 instead.</p>
+			</section>
+		</main>
+	</div>
+	<script th:src="@{/js/admin-medicines.js}"></script>
+</body>
+</html>

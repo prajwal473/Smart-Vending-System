@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Transaction Details | Admin | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside th:replace="~{admin/fragments :: sidebar('transactions')}"></aside>
+
+		<main class="content" id="main">
+			<header class="page-head">
+				<div>
+					<p class="eyebrow">Transaction</p>
+					<h1 th:text="${transaction != null} ? ${transaction.transactionReference} : 'Transaction not found'">TXN-00000001</h1>
+				</div>
+				<div class="head-actions">
+					<a class="btn btn-secondary" th:href="@{/admin/transactions}">&larr; All transactions</a>
+					<a class="btn btn-secondary" th:href="@{/admin/dashboard}">Dashboard</a>
+					<a class="btn btn-secondary" th:href="@{/admin/medicines}">Manage medicines</a>
+				</div>
+			</header>
+
+			<section class="panel" th:if="${transaction == null}" role="alert">
+				<h2>Transaction not found</h2>
+				<p class="empty">That transaction does not exist. It may have been mistyped; go back to the history and pick one from the list.</p>
+			</section>
+
+			<section class="panel" th:if="${transaction != null}">
+				<dl class="detail-list">
+					<div><dt>Transaction ID</dt><dd th:text="${transaction.transactionId}">1</dd></div>
+					<div><dt>Receipt reference</dt><dd th:text="${transaction.transactionReference}">TXN-00000001</dd></div>
+					<div><dt>Medicine ID</dt><dd th:text="${transaction.medicineId == null} ? '—' : ${transaction.medicineId}">1</dd></div>
+					<div><dt>Medicine name</dt><dd th:text="${transaction.medicineName}">Name</dd></div>
+					<div><dt>Quantity</dt><dd th:text="${transaction.quantity}">1</dd></div>
+					<div><dt>Total amount</dt><dd th:text="${transaction.totalAmount == null} ? '—' : ${'₹' + #numbers.formatDecimal(transaction.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹0.00</dd></div>
+					<div><dt>Date &amp; time</dt><dd th:text="${transaction.transactionDate == null} ? '—' : ${#temporals.format(transaction.transactionDate, 'dd MMM yyyy, HH:mm:ss')}">01 Jan 2030</dd></div>
+				</dl>
+				<p class="muted">
+					<span th:if="${medicineExists}">This medicine is still in inventory:
+						<a th:href="@{/admin/medicines/{id}/edit(id=${transaction.medicineId})}">open its record</a>.</span>
+					<span th:unless="${medicineExists}">This medicine is no longer in the inventory (or the sale has no medicine ID).</span>
+					Only completed purchases are recorded, so every transaction here was a successful payment.
+				</p>
+			</section>
+		</main>
+	</div>
+</body>
+</html>

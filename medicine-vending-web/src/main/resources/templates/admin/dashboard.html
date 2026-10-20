@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Dashboard | Admin | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside th:replace="~{admin/fragments :: sidebar('dashboard')}"></aside>
+
+		<main class="content" id="main">
+			<header class="page-head">
+				<div>
+					<p class="eyebrow">Overview</p>
+					<h1>Dashboard</h1>
+				</div>
+				<p class="muted">All figures are read live from the database.</p>
+			</header>
+
+			<section class="cards" aria-label="Summary">
+				<article class="card">
+					<p class="card-label">Total medicines</p>
+					<p class="card-value" th:text="${#numbers.formatInteger(d.totalMedicines(), 1, 'COMMA')}">0</p>
+				</article>
+				<article class="card">
+					<p class="card-label">Available stock (units)</p>
+					<p class="card-value" th:text="${#numbers.formatInteger(d.totalStock(), 1, 'COMMA')}">0</p>
+				</article>
+				<article class="card">
+					<p class="card-label">Total transactions</p>
+					<p class="card-value" th:text="${#numbers.formatInteger(d.totalTransactions(), 1, 'COMMA')}">0</p>
+				</article>
+				<article class="card card-accent">
+					<p class="card-label">Total sales</p>
+					<p class="card-value" th:text="${'₹' + #numbers.formatDecimal(d.totalSales(), 1, 'COMMA', 2, 'POINT')}">₹0.00</p>
+				</article>
+			</section>
+
+			<section class="panel" aria-labelledby="low-title">
+				<h2 id="low-title">Low-stock medicines
+					<span class="pill pill-warn" th:text="${d.lowStockCount()}">0</span></h2>
+				<p class="muted" th:text="|Stock below ${d.lowStockThreshold()} units.|">Stock below 5 units.</p>
+				<p class="empty" th:if="${#lists.isEmpty(d.lowStock())}">No medicines are low on stock.</p>
+				<div class="table-wrap" th:unless="${#lists.isEmpty(d.lowStock())}">
+					<table>
+						<thead><tr><th>ID</th><th>Medicine</th><th>Category</th><th>Slot</th><th class="num">Stock</th></tr></thead>
+						<tbody>
+							<tr th:each="m : ${d.lowStock()}">
+								<td th:text="${m.medicineId}">1</td>
+								<td th:text="${m.medicineName}">Name</td>
+								<td th:text="${m.category}">Category</td>
+								<td th:text="${m.slotNumber}">1</td>
+								<td class="num"><span class="pill" th:classappend="${m.stock <= 0} ? 'pill-bad' : 'pill-warn'"
+									th:text="${m.stock <= 0} ? 'Out of stock' : ${m.stock}">3</span></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<p class="muted more" th:if="${d.lowStockCount() > #lists.size(d.lowStock())}"
+					th:text="|Showing ${#lists.size(d.lowStock())} of ${d.lowStockCount()}.|"></p>
+			</section>
+
+			<div class="two-col">
+				<section class="panel" aria-labelledby="exp-title">
+					<h2 id="exp-title">Expired medicines
+						<span class="pill pill-bad" th:text="${d.expiredCount()}">0</span></h2>
+					<p class="empty" th:if="${#lists.isEmpty(d.expired())}">No expired medicines.</p>
+					<div class="table-wrap" th:unless="${#lists.isEmpty(d.expired())}">
+						<table>
+							<thead><tr><th>Medicine</th><th>Slot</th><th>Expired on</th><th class="num">Stock</th></tr></thead>
+							<tbody>
+								<tr th:each="m : ${d.expired()}">
+									<td th:text="${m.medicineName}">Name</td>
+									<td th:text="${m.slotNumber}">1</td>
+									<td th:text="${#temporals.format(m.expiryDate, 'dd MMM yyyy')}">01 Jan 2020</td>
+									<td class="num" th:text="${m.stock}">0</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="muted more" th:if="${d.expiredCount() > #lists.size(d.expired())}"
+						th:text="|Showing ${#lists.size(d.expired())} of ${d.expiredCount()}.|"></p>
+				</section>
+
+				<section class="panel" aria-labelledby="soon-title">
+					<h2 id="soon-title">Expiring soon
+						<span class="pill pill-warn" th:text="${d.expiringSoonCount()}">0</span></h2>
+					<p class="muted" th:text="|Within the next ${d.expiryWarningDays()} days.|">Within the next 30 days.</p>
+					<p class="empty" th:if="${#lists.isEmpty(d.expiringSoon())}">Nothing expires in this window.</p>
+					<div class="table-wrap" th:unless="${#lists.isEmpty(d.expiringSoon())}">
+						<table>
+							<thead><tr><th>Medicine</th><th>Slot</th><th>Expires on</th><th class="num">Stock</th></tr></thead>
+							<tbody>
+								<tr th:each="m : ${d.expiringSoon()}">
+									<td th:text="${m.medicineName}">Name</td>
+									<td th:text="${m.slotNumber}">1</td>
+									<td th:text="${#temporals.format(m.expiryDate, 'dd MMM yyyy')}">01 Jan 2030</td>
+									<td class="num" th:text="${m.stock}">0</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="muted more" th:if="${d.expiringSoonCount() > #lists.size(d.expiringSoon())}"
+						th:text="|Showing ${#lists.size(d.expiringSoon())} of ${d.expiringSoonCount()}.|"></p>
+				</section>
+			</div>
+
+			<section class="panel" aria-labelledby="recent-title">
+				<h2 id="recent-title">Recent transactions
+					<a class="view-all" th:href="@{/admin/transactions}">View all &rarr;</a></h2>
+				<p class="empty" th:if="${#lists.isEmpty(d.recentTransactions())}">No transactions have been recorded yet.</p>
+				<div class="table-wrap" th:unless="${#lists.isEmpty(d.recentTransactions())}">
+					<table>
+						<thead><tr><th>Reference</th><th>Medicine</th><th class="num">Qty</th><th class="num">Total</th><th>Date</th></tr></thead>
+						<tbody>
+							<tr th:each="t : ${d.recentTransactions()}">
+								<td><a th:href="@{/admin/transactions/{id}(id=${t.transactionId})}" th:text="${t.transactionReference}">TXN-00000001</a></td>
+								<td th:text="${t.medicineName}">Name</td>
+								<td class="num" th:text="${t.quantity}">1</td>
+								<td class="num" th:text="${t.totalAmount == null} ? '—' : ${'₹' + #numbers.formatDecimal(t.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+								<td th:text="${t.transactionDate == null} ? '—' : ${#temporals.format(t.transactionDate, 'dd MMM yyyy, HH:mm')}">01 Jan 2030</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</main>
+	</div>
+</body>
+</html>

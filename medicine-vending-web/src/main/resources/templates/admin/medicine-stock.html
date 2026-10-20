@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Update Stock | Admin | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside th:replace="~{admin/fragments :: sidebar('medicines')}"></aside>
+
+		<main class="content" id="main">
+			<header class="page-head">
+				<div>
+					<p class="eyebrow">Stock management</p>
+					<h1 th:text="${medicine.medicineName}">Medicine</h1>
+				</div>
+				<a class="btn btn-secondary" th:href="@{/admin/medicines}">&larr; Back to medicines</a>
+			</header>
+
+			<p class="alert alert-success" role="status" th:if="${flashSuccess != null}" th:text="${flashSuccess}">Saved.</p>
+			<p class="alert alert-error" role="alert" th:if="${flashError != null}" th:text="${flashError}">Error.</p>
+
+			<section class="cards">
+				<article class="card">
+					<p class="card-label">Current stock</p>
+					<p class="card-value" th:text="${medicine.stock}">0</p>
+				</article>
+				<article class="card">
+					<p class="card-label">Slot</p>
+					<p class="card-value" th:text="${medicine.slotNumber}">1</p>
+				</article>
+			</section>
+
+			<div class="two-col">
+				<section class="panel">
+					<h2>Add or remove units</h2>
+					<p class="muted">Use a positive number to restock, or a negative number to remove units. Stock cannot go below zero.</p>
+					<form method="post" th:action="@{/admin/medicines/{id}/stock/adjust(id=${medicine.medicineId})}">
+						<div class="field">
+							<label for="delta">Change (e.g. 10 or -3)</label>
+							<input id="delta" name="delta" type="number" step="1" min="-1000000" max="1000000" required>
+						</div>
+						<button class="btn btn-primary" type="submit">Apply change</button>
+					</form>
+				</section>
+				<section class="panel">
+					<h2>Set exact quantity</h2>
+					<p class="muted">Replace the stock count, for example after counting the machine.</p>
+					<form method="post" th:action="@{/admin/medicines/{id}/stock/set(id=${medicine.medicineId})}">
+						<div class="field">
+							<label for="stock">New stock</label>
+							<input id="stock" name="stock" type="number" step="1" min="0" max="1000000" required>
+						</div>
+						<button class="btn btn-primary" type="submit">Set stock</button>
+					</form>
+				</section>
+			</div>
+		</main>
+	</div>
+</body>
+</html>

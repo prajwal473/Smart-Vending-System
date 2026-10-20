@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Purchase | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/home.css}">
+	<link rel="stylesheet" th:href="@{/css/purchase.css}">
+</head>
+<body>
+	<header class="site-header">
+		<div class="header-inner">
+			<div class="brand">
+				<div class="brand-mark" aria-hidden="true">+</div>
+				<div>
+					<p class="eyebrow">Purchase</p>
+					<h1 th:text="${title}">Notice</h1>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="page purchase-page">
+		<section class="purchase-card" role="alert">
+			<p class="message-text" th:text="${text}">Message</p>
+			<div class="pay-actions">
+				<a class="btn btn-primary" th:if="${retryUrl != null}" th:href="@{${retryUrl}}">Try again</a>
+				<a class="btn btn-secondary" th:href="@{/}">Back to medicines</a>
+			</div>
+		</section>
+	</main>
+</body>
+</html>

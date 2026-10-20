@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Confirm Purchase | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/home.css}">
+	<link rel="stylesheet" th:href="@{/css/purchase.css}">
+</head>
+<body>
+	<header class="site-header">
+		<div class="header-inner">
+			<div class="brand">
+				<div class="brand-mark" aria-hidden="true">+</div>
+				<div>
+					<p class="eyebrow">Step 1 of 2 · Confirm purchase</p>
+					<h1>Review your order</h1>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="page purchase-page">
+		<section class="purchase-card" aria-labelledby="order-heading">
+			<span class="category-chip" th:text="${quote.category}">Category</span>
+			<h2 id="order-heading" th:text="${quote.medicineName}">Medicine name</h2>
+
+			<dl class="order-lines">
+				<div>
+					<dt>Price per item</dt>
+					<dd th:text="${'₹' + #numbers.formatDecimal(quote.unitPrice, 1, 'COMMA', 2, 'POINT')}">₹0.00</dd>
+				</div>
+				<div>
+					<dt>Quantity</dt>
+					<dd th:text="${quote.quantity}">1</dd>
+				</div>
+				<div>
+					<dt>Expiry date</dt>
+					<dd th:text="${#temporals.format(quote.expiryDate, 'dd MMM yyyy')}">01 Jan 2030</dd>
+				</div>
+				<div class="order-total">
+					<dt>Total to pay</dt>
+					<dd th:text="${'₹' + #numbers.formatDecimal(quote.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹0.00</dd>
+				</div>
+			</dl>
+
+			<p class="notice">
+				<strong>Simulated payment.</strong>
+				No real money is taken and no card or UPI details are collected.
+				The total above was calculated by the server from the machine's price list.
+				Stock and expiry are checked again when you pay.
+			</p>
+
+			<form id="pay-form" class="pay-form" method="post" th:action="@{/purchase/pay}">
+				<input type="hidden" name="token" th:value="${token}">
+				<p class="pay-label">Choose a simulated payment result:</p>
+				<div class="pay-actions">
+					<button class="btn btn-primary" type="submit" name="outcome" value="SUCCESS">
+						Pay now (simulate success)
+					</button>
+					<button class="btn btn-warning" type="submit" name="outcome" value="FAILURE">
+						Simulate failed payment
+					</button>
+				</div>
+				<p class="busy-note" id="busy-note" hidden>Processing… please do not refresh or press back.</p>
+			</form>
+
+			<a class="btn btn-secondary cancel-link" th:href="@{/}">Cancel and go back</a>
+		</section>
+	</main>
+
+	<script th:src="@{/js/purchase.js}"></script>
+</body>
+</html>

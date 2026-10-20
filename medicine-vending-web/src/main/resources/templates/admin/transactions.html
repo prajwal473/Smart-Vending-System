@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Transaction History | Admin | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside th:replace="~{admin/fragments :: sidebar('transactions')}"></aside>
+
+		<main class="content" id="main">
+			<header class="page-head">
+				<div>
+					<p class="eyebrow">Sales</p>
+					<h1>Transaction History</h1>
+				</div>
+				<div class="head-actions">
+					<a class="btn btn-secondary" th:href="@{/admin/dashboard}">&larr; Dashboard</a>
+					<a class="btn btn-secondary" th:href="@{/admin/medicines}">Manage medicines</a>
+				</div>
+			</header>
+
+			<section class="panel" aria-labelledby="filter-title">
+				<h2 id="filter-title">Search and filter</h2>
+				<form method="get" th:action="@{/admin/transactions}" class="filter-form">
+					<div class="field">
+						<label for="q">Transaction ID or medicine name</label>
+						<input id="q" name="q" type="search" maxlength="100" th:value="${q}" placeholder="e.g. 42, TXN-00000042 or paracetamol">
+					</div>
+					<div class="field">
+						<label for="start">From date</label>
+						<input id="start" name="start" type="date" th:value="${start}">
+					</div>
+					<div class="field">
+						<label for="end">To date (whole day included)</label>
+						<input id="end" name="end" type="date" th:value="${end}">
+					</div>
+					<div class="field">
+						<label for="size">Rows per page</label>
+						<select id="size" name="size">
+							<option th:each="s : ${sizeOptions}" th:value="${s}" th:text="${s}"
+								th:selected="${s == h.size()}">25</option>
+						</select>
+					</div>
+					<div class="form-actions">
+						<button class="btn btn-primary" type="submit">Apply</button>
+						<a class="btn btn-secondary" th:href="@{/admin/transactions}">Clear</a>
+					</div>
+				</form>
+			</section>
+
+			<p class="alert alert-error" role="alert" th:if="${h.hasError()}" th:text="${h.error()}">Error.</p>
+
+			<section class="cards" aria-label="Summary for the current filters" th:unless="${h.hasError()}">
+				<article class="card">
+					<p class="card-label">Matching transactions</p>
+					<p class="card-value" th:text="${#numbers.formatInteger(h.totalCount(), 1, 'COMMA')}">0</p>
+				</article>
+				<article class="card card-accent">
+					<p class="card-label">Total sales (matching)</p>
+					<p class="card-value" th:text="${'₹' + #numbers.formatDecimal(h.totalSales(), 1, 'COMMA', 2, 'POINT')}">₹0.00</p>
+				</article>
+			</section>
+
+			<section class="panel" aria-labelledby="list-title" th:unless="${h.hasError()}">
+				<h2 id="list-title">Transactions
+					<span class="pill" th:text="|Page ${h.page()} of ${h.totalPages() == 0 ? 1 : h.totalPages()}|">Page 1 of 1</span></h2>
+
+				<p class="empty" th:if="${#lists.isEmpty(h.rows()) and filtered}">No transactions match these filters.</p>
+				<p class="empty" th:if="${#lists.isEmpty(h.rows()) and !filtered}">No transactions have been recorded yet. Sales made at the kiosk will appear here.</p>
+
+				<div class="table-wrap" th:unless="${#lists.isEmpty(h.rows())}">
+					<table>
+						<thead>
+							<tr><th>Transaction ID</th><th>Medicine ID</th><th>Medicine</th><th class="num">Qty</th>
+								<th class="num">Total</th><th>Date &amp; time</th><th></th></tr>
+						</thead>
+						<tbody>
+							<tr th:each="t : ${h.rows()}">
+								<td th:text="${t.transactionId}">1</td>
+								<td th:text="${t.medicineId == null} ? '—' : ${t.medicineId}">1</td>
+								<td th:text="${t.medicineName}">Name</td>
+								<td class="num" th:text="${t.quantity}">1</td>
+								<td class="num" th:text="${t.totalAmount == null} ? '—' : ${'₹' + #numbers.formatDecimal(t.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+								<td th:text="${t.transactionDate == null} ? '—' : ${#temporals.format(t.transactionDate, 'dd MMM yyyy, HH:mm:ss')}">01 Jan 2030</td>
+								<td><a class="btn btn-sm btn-secondary" th:href="@{/admin/transactions/{id}(id=${t.transactionId})}">Details</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<p class="muted more" th:unless="${#lists.isEmpty(h.rows())}"
+					th:text="|Showing ${h.firstShown()}–${h.lastShown()} of ${h.totalCount()} matching transactions.|">Showing 1–25 of 100.</p>
+
+				<nav class="pagination" aria-label="Transaction pages" th:if="${h.totalPages() > 1}">
+					<a class="btn btn-sm btn-secondary" th:if="${h.hasPrevious()}"
+						th:href="@{/admin/transactions(q=${q},start=${start},end=${end},size=${h.size()},page=${h.page() - 1})}">&larr; Previous</a>
+					<a class="btn btn-sm btn-secondary" th:if="${h.page() > 3}"
+						th:href="@{/admin/transactions(q=${q},start=${start},end=${end},size=${h.size()},page=1)}">1</a>
+					<span class="muted" th:if="${h.page() > 4}">…</span>
+					<th:block th:each="p : ${h.pageWindow()}">
+						<span class="btn btn-sm btn-primary current" th:if="${p == h.page()}" aria-current="page" th:text="${p}">1</span>
+						<a class="btn btn-sm btn-secondary" th:unless="${p == h.page()}"
+							th:href="@{/admin/transactions(q=${q},start=${start},end=${end},size=${h.size()},page=${p})}" th:text="${p}">2</a>
+					</th:block>
+					<span class="muted" th:if="${h.page() < h.totalPages() - 3}">…</span>
+					<a class="btn btn-sm btn-secondary" th:if="${h.page() < h.totalPages() - 2}"
+						th:href="@{/admin/transactions(q=${q},start=${start},end=${end},size=${h.size()},page=${h.totalPages()})}" th:text="${h.totalPages()}">9</a>
+					<a class="btn btn-sm btn-secondary" th:if="${h.hasNext()}"
+						th:href="@{/admin/transactions(q=${q},start=${start},end=${end},size=${h.size()},page=${h.page() + 1})}">Next &rarr;</a>
+				</nav>
+			</section>
+		</main>
+	</div>
+</body>
+</html>

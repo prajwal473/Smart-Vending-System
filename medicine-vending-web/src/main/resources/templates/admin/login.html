@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Admin Login | Smart Vending System</title>
+	<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body class="login-body">
+	<main class="login-wrap">
+		<section class="login-card" aria-labelledby="login-title">
+			<div class="login-brand">
+				<div class="brand-mark" aria-hidden="true">+</div>
+				<div>
+					<p class="eyebrow">Administrator access</p>
+					<h1 id="login-title">Smart Vending System</h1>
+					<p class="sub">for OTC Medicines and Essentials</p>
+				</div>
+			</div>
+
+			<p class="alert alert-error" role="alert" th:if="${param.error}">
+				Invalid username or password.
+			</p>
+			<p class="alert alert-info" role="status" th:if="${param.logout}">
+				You have been signed out.
+			</p>
+			<p class="alert alert-error" role="alert" id="client-error" hidden></p>
+
+			<form id="login-form" method="post" th:action="@{/admin/login}" novalidate>
+				<div class="field">
+					<label for="username">Username</label>
+					<input id="username" name="username" type="text" autocomplete="username"
+						maxlength="100" required autofocus>
+				</div>
+				<div class="field">
+					<label for="password">Password</label>
+					<div class="password-row">
+						<input id="password" name="password" type="password" autocomplete="current-password"
+							maxlength="200" required>
+						<button type="button" class="btn-ghost" id="toggle-password" aria-pressed="false">Show</button>
+					</div>
+				</div>
+				<button class="btn btn-primary btn-block" type="submit">Log in</button>
+			</form>
+
+			<a class="back-link" th:href="@{/}">&larr; Back to the customer kiosk</a>
+		</section>
+	</main>
+	<script th:src="@{/js/admin-login.js}"></script>
+</body>
+</html>

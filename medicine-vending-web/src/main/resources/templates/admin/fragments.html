@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<!-- Shared admin sidebar. Usage: <aside th:replace="~{admin/fragments :: sidebar('medicines')}"></aside> -->
+	<aside class="sidebar" aria-label="Admin navigation" th:fragment="sidebar(active)">
+		<div class="side-brand">
+			<div class="brand-mark" aria-hidden="true">+</div>
+			<div>
+				<strong>Smart Vending</strong>
+				<span>Admin console</span>
+			</div>
+		</div>
+		<nav>
+			<ul class="nav-list">
+				<li><a class="nav-item" th:classappend="${active == 'dashboard'} ? 'active'"
+					th:attr="aria-current=${active == 'dashboard'} ? 'page'"
+					th:href="@{/admin/dashboard}">Dashboard</a></li>
+				<li><a class="nav-item" th:classappend="${active == 'medicines'} ? 'active'"
+					th:attr="aria-current=${active == 'medicines'} ? 'page'"
+					th:href="@{/admin/medicines}">Manage Medicines</a></li>
+				<li><a class="nav-item" th:classappend="${active == 'transactions'} ? 'active'"
+					th:attr="aria-current=${active == 'transactions'} ? 'page'"
+					th:href="@{/admin/transactions}">Transaction History</a></li>
+				<li><a class="nav-item" th:href="@{/}">View customer kiosk</a></li>
+			</ul>
+		</nav>
+		<form class="logout-form" method="post" th:action="@{/admin/logout}">
+			<p class="signed-in">Signed in as <strong th:text="${adminName}">admin</strong></p>
+			<button class="btn btn-logout" type="submit">Logout</button>
+		</form>
+	</aside>
+</body>
+</html>
